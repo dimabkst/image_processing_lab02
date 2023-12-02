@@ -1,5 +1,5 @@
 from typing import Tuple
-from custom_types import ListImage, FloatOrNone, FilterKernel, ImageFunction
+from custom_types import EVSet, ListImage, FloatOrNone, FilterKernel, ImageFunction, ListImageWindow
 from math import log10
 from constants import MAX_NUMBER_OF_INTENSITY_LEVELS
 from utils import generateGaussianNoise, convertToProperImage
@@ -136,5 +136,32 @@ def linearSpatialFiltering(image: ListImage, filter_kernel: FilterKernel) -> Lis
     b = filter_kernel_sizes[1] // 2
 
     filtered_image = [[sum([sum([filter_kernel[a + s][b + t] * extended_image_function(i + s, j + t) for t in range(-b, b + 1)]) for s in range(-a, a + 1)]) for j in range(M)] for i in range(N)]
+
+    return convertToProperImage(filtered_image)
+
+def getEVSet(window: ListImageWindow, pixel_of_interest: int, ev: float) -> EVSet:
+    window_elements = []
+
+    for row in window:
+        for el in row:
+            window_elements.append(el)
+
+    EV = [el for el in window_elements if abs(pixel_of_interest - el) <= ev]
+
+    return EV
+
+def getEVSetMean(EV: EVSet) -> float:
+    return sum(EV) / len(EV)
+
+def rankOrderEVMeanFiltering(image: ListImage, filter_window_sizes: Tuple[int, int], ev: float) -> ListImage:
+    N = len(image)
+    M = len(image[0])
+
+    extended_image_function = getMirroredImageFunction(image, filter_window_sizes)
+
+    a = filter_window_sizes[0] // 2
+    b = filter_window_sizes[1] // 2
+
+    filtered_image = [[getEVSetMean(getEVSet([[extended_image_function(i + s, j + t) for t in range(-b, b + 1)] for s in range(-a, a + 1)], image[i][j], ev)) for j in range(M)] for i in range(N)]
 
     return convertToProperImage(filtered_image)
