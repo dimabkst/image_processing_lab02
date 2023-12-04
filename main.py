@@ -20,14 +20,14 @@ def labTask(image_path: str) -> None:
 
             print(f'Image = {image_path}, mean = {mean}, variance = {variance}, standard deviation = {standard_deviation}.')
 
-            std_dev_coefs = [0.2]
+            std_dev_coefs = [0.2, 0.3]
 
             noisy_images = [addGaussianAdditiveNoise(image, std_dev_coef) for std_dev_coef in std_dev_coefs]
 
             noisy_RMSEs = [getRMSE(image, noisy_image) for noisy_image in noisy_images]
             noisy_PSNRs = [getPSNR(image, noisy_images[i], noisy_RMSEs[i]) for i in range(len(noisy_images))]
 
-            filter_window_sizes = [(3, 3)]
+            filter_window_sizes = [(3, 3), (5, 5)]
 
             ev = standard_deviation
 
